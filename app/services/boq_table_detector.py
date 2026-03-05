@@ -1,7 +1,7 @@
 # Configurable Table Detector
 import pandas as pd
 from typing import List, Optional
-from utils.text_cleaner import normalize_header
+from app.utils.text_cleaner import normalize_header
 
 def detect_boq_table(df: pd.DataFrame, keywords: List[str]) -> pd.DataFrame:
     """ Detect where the actual data table starts based on keywords. """

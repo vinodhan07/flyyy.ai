@@ -1,6 +1,5 @@
-# Main Application Entry Point
 from fastapi import FastAPI
-from api.routes import router
+from app.api.routes import router
 
 app = FastAPI()
 

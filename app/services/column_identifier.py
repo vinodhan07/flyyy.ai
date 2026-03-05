@@ -1,8 +1,8 @@
 # Generalized Column Identifier
 import pandas as pd
 from typing import Dict, List
-from utils.fuzzy_matcher import get_best_match
-from utils.text_cleaner import normalize_header
+from app.utils.fuzzy_matcher import get_best_match
+from app.utils.text_cleaner import normalize_header
 from loguru import logger
 
 def identify_columns(df_columns: List[str], industry_mapping: Dict[str, List[str]], threshold: int = 70) -> Dict[str, str]:

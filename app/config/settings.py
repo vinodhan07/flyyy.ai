@@ -1,6 +1,22 @@
 # Industry-specific configurations
 from typing import Dict, List
 
+HEADER_KEYWORDS = [
+    "description",
+    "item",
+    "material",
+    "equipment",
+    "qty",
+    "quantity"
+]
+
+CATEGORY_RULES = {
+    "switchgear": ["breaker", "rmu", "switchgear"],
+    "power_equipment": ["transformer"],
+    "electrical_panel": ["panel", "distribution board"],
+    "electrical_appliance": ["fan", "light"]
+}
+
 # No more hardcoding - all strings are centralized here
 INDUSTRY_CONFIGS: Dict[str, Dict] = {
     "construction": {

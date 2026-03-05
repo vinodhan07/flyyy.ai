@@ -1,9 +1,10 @@
 # Optimized and Robust Extractor
 import pandas as pd
 from typing import List, Dict
-from models.boq_schema import ExtractedItem
-from utils.text_cleaner import clean_text, clean_quantity, is_valid_row
-from config.settings import INVALID_ROW_KEYWORDS
+from app.models.boq_schema import ExtractedItem
+from app.utils.text_cleaner import clean_text, clean_quantity, is_valid_row
+from app.config.settings import INVALID_ROW_KEYWORDS
+from app.services.category_classifier import classify_category
 from loguru import logger
 
 def extract_boq(df: pd.DataFrame, column_map: Dict[str, str]) -> List[ExtractedItem]:
@@ -40,7 +41,7 @@ def extract_boq(df: pd.DataFrame, column_map: Dict[str, str]) -> List[ExtractedI
                 "product": product_cleaned,
                 "brand": clean_text(raw_brand) or "Generic",
                 "quantity": clean_quantity(raw_qty),
-                "category": clean_text(raw_category) or "Uncategorized"
+                "category": classify_category(product_cleaned)
             }
 
             # 4. Strict Schema Validation
@@ -52,3 +53,18 @@ def extract_boq(df: pd.DataFrame, column_map: Dict[str, str]) -> List[ExtractedI
             continue
         
     return results
+
+def consolidate_duplicates(items):
+    if not items:
+        return []
+
+    # Handle if items are Pydantic models or dicts
+    dict_items = [item.dict() if hasattr(item, "dict") else item for item in items]
+    df = pd.DataFrame(dict_items)
+
+    grouped = (
+        df.groupby(["product", "brand"], as_index=False)
+        .agg({"quantity": "sum", "category": "first"})
+    )
+
+    return grouped.to_dict(orient="records")

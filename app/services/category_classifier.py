@@ -1,15 +1,11 @@
-# Category Classifier
-def classify_category(product):
+from app.config.settings import CATEGORY_RULES
 
-    p = product.lower()
+def classify_category(product: str):
+    p = product.lower() if product else ""
 
-    if "breaker" in p:
-        return "Switchgear"
+    for category, keywords in CATEGORY_RULES.items():
+        for kw in keywords:
+            if kw in p:
+                return category
 
-    if "rmu" in p:
-        return "Switchgear"
-
-    if "transformer" in p:
-        return "Power Equipment"
-
-    return "Electrical Equipment"
+    return "misc"
