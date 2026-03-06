@@ -1,14 +1,17 @@
-# ─── Category Classification ───
-from app.config.settings import CATEGORY_RULES
+# ─── EPC Category Classification ───
+from app.config.settings import EPC_CATEGORY_RULES
 
 
 def classify_category(product: str) -> str:
-    """Classify a product string into a category based on keyword rules."""
-    text = product.lower() if product else ""
+    """Classify BOQ item into EPC category."""
+    if not product:
+        return "misc"
 
-    for category, keywords in CATEGORY_RULES.items():
-        for kw in keywords:
-            if kw in text:
+    text = product.lower()
+
+    for category, keywords in EPC_CATEGORY_RULES.items():
+        for keyword in keywords:
+            if keyword in text:
                 return category
 
     return "misc"

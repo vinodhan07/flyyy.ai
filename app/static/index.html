@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FLYYY.AI — BOQ Extractor</title>
+  <meta name="description" content="Extract structured BOQ data from Excel files with intelligent header detection, fuzzy column mapping, and automated filtering." />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+  <!-- ═══ TOAST ═══ -->
+  <div id="toast" class="toast"></div>
+
+  <div class="container">
+
+    <!-- ═══ HEADER ═══ -->
+    <header>
+      <div class="brand">
+        <h1>FLYYY.AI</h1>
+        <span>BOQ Extractor v2.0</span>
+      </div>
+      <div class="pipeline-steps">
+        <div class="step active" id="step-upload">01 Upload</div>
+        <div class="step" id="step-process">02 Process</div>
+        <div class="step" id="step-results">03 Results</div>
+      </div>
+    </header>
+
+    <!-- ═══ UPLOAD ═══ -->
+    <section class="upload-section">
+      <h2>Upload Excel File</h2>
+
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls" hidden />
+        <div class="dropzone-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+          </svg>
+        </div>
+        <div class="dropzone-text">
+          Drag &amp; drop your <strong>.xlsx</strong> / <strong>.xls</strong> file here, or <strong>click to browse</strong>
+        </div>
+        <div class="file-info" id="fileInfo">
+          <span class="file-name" id="fileName"></span>
+          <span class="file-size" id="fileSize"></span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <select class="industry-select" id="industrySelect">
+          <option value="construction">⛏ Construction</option>
+          <option value="retail">🏪 Retail</option>
+          <option value="default">⚙ Default</option>
+        </select>
+        <button class="extract-btn" id="extractBtn" disabled>Extract</button>
+      </div>
+    </section>
+
+    <!-- ═══ RESULTS ═══ -->
+    <section class="results-section" id="resultsSection">
+
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-value" id="statSheets">0</div>
+          <div class="stat-label">Total Sheets</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statSheetsData">0</div>
+          <div class="stat-label">Sheets With Data</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statItems">0</div>
+          <div class="stat-label">Extracted Items</div>
+        </div>
+      </div>
+
+      <div class="table-controls">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search products..." />
+        <button class="csv-btn" id="csvBtn">↓ Download CSV</button>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th data-col="product">Product <span class="sort-arrow">▲</span></th>
+              <th data-col="brand">Brand <span class="sort-arrow">▲</span></th>
+              <th data-col="quantity">Qty <span class="sort-arrow">▲</span></th>
+              <th data-col="category">Category <span class="sort-arrow">▲</span></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0 2.25-2.25M12 13.875V7.5M3.75 7.5h16.5" />
+        </svg>
+        <p>No items extracted. Try a different file or industry.</p>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

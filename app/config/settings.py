@@ -34,16 +34,73 @@ INVALID_ROW_KEYWORDS = [
 ]
 
 # ─── Extraction Limits ───
-MAX_PRODUCT_LENGTH = 150
+MAX_PRODUCT_LENGTH = 200  # Raised slightly to allow merged descriptions
 MAX_REASONABLE_QUANTITY = 1000
 
-# ─── Category Rules ───
-CATEGORY_RULES = {
-    "switchgear": ["breaker", "rmu"],
-    "power_equipment": ["transformer", "dg set", "substation"],
-    "electrical_panel": ["panel", "distribution"],
-    "electrical_appliance": ["fan", "light", "sensor", "ups"]
+# ─── Engineering Attribute Ignore Words ───
+# NOTE: 'total'/'subtotal' are NOT here — they're in INVALID_ROW_KEYWORDS
+IGNORE_WORDS = [
+    "floor", "depth", "nominal", "dia",
+    "from", "upto", "schedule",
+    "as per", "refer", "drawing"
+]
+
+# ─── Regex Patterns for Attribute Lines ───
+DIMENSION_PATTERN = r"^\s*\d+\s*(mm|cm|m|sq\.?mm)"
+DEPTH_PATTERN = r"\d+(\.\d+)?\s*m\s*depth"
+
+# ─── EPC Material Classification Keywords ───
+EPC_CATEGORY_RULES = {
+    "Electrical": [
+        "switch", "socket", "mcb", "isolator",
+        "earthing", "charger", "junction",
+        "transformer", "dg set", "substation",
+        "switchgear", "breaker", "ups"
+    ],
+    "Lighting": [
+        "light", "lamp", "led", "downlight",
+        "tube", "flood", "bulkhead", "lighting"
+    ],
+    "Cable & Wiring": [
+        "cable", "wire", "conduit",
+        "tray", "xlpe", "armoured", "wiring"
+    ],
+    "Panels": [
+        "panel", "distribution board",
+        "rmu", "ht panel", "lt panel", "control panel"
+    ],
+    "Plumbing": [
+        "pipe", "valve", "tap", "cock",
+        "pump", "chilled water", "drain", "water supply"
+    ],
+    "Civil Materials": [
+        "cement", "sand", "brick",
+        "aggregate", "concrete",
+        "bitumen", "steel", "reinforcement"
+    ],
+    "Fixtures": [
+        "lift", "elevator", "fan",
+        "mirror", "dryer", "holder",
+        "sensor", "fixture"
+    ]
 }
+
+# ─── Material Keyword Validation ───
+# Only keep rows that contain at least one of these real-material words
+MATERIAL_KEYWORDS = [
+    "pipe", "cable", "lift", "light", "panel",
+    "cement", "brick", "fan", "tray", "wire",
+    "valve", "pump", "switch", "socket", "conduit",
+    "transformer", "breaker", "lamp", "led", "xlpe",
+    "armoured", "concrete", "sand", "steel", "elevator",
+    "sensor", "fixture", "mcb", "isolator", "earthing",
+    "bitumen", "aggregate", "holder", "dryer", "mirror",
+    "ups", "dg set", "substation", "switchgear",
+    "distribution board", "rmu", "tap", "cock",
+    "chilled water", "drain", "water supply",
+    "reinforcement", "bulkhead", "flood", "downlight",
+    "junction", "charger", "tube"
+]
 
 # ─── Industry Configs ───
 INDUSTRY_CONFIGS: Dict[str, Dict] = {

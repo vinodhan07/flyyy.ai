@@ -4,7 +4,7 @@ import io
 from loguru import logger
 
 from app.services.excel_analyzer import process_excel
-from app.services.boq_extractor import consolidate_duplicates
+from app.services.boq_extractor import consolidate_duplicates, group_by_category
 
 router = APIRouter()
 
@@ -58,12 +58,16 @@ async def extract_excel_data(
 
         logger.info(f"Final output: {len(items)} items from {result['total_sheets']} sheet(s).")
 
-        # 11. Response
+        # 11. Group by EPC category
+        categories = group_by_category(items)
+
+        # 12. Response
         return {
             "total_sheets": result["total_sheets"],
             "sheets_with_data": result["sheets_with_data"],
             "extracted_items": len(items),
             "items": items,
+            "categories": categories,
         }
 
     except HTTPException:

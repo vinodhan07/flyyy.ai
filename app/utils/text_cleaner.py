@@ -1,11 +1,15 @@
-# ─── Text Cleaning & Row Validation Utilities ───
+# ─── Text Cleaning, Attribute Detection & Validation ───
 import re
-from typing import Any
+from typing import Any, List
 
 from app.config.settings import (
     INVALID_ROW_KEYWORDS,
     SECTION_KEYWORDS,
     MAX_PRODUCT_LENGTH,
+    IGNORE_WORDS,
+    DIMENSION_PATTERN,
+    DEPTH_PATTERN,
+    MATERIAL_KEYWORDS,
 )
 
 
@@ -29,6 +33,42 @@ def clean_quantity(value: Any) -> float:
         return float(match.group())
 
     return 0.0
+
+
+def is_attribute_line(text: str) -> bool:
+    """
+    Check if a line is an engineering attribute / dimension / specification
+    rather than a real material description.
+    Examples: '250 mm nominal dia', 'From 3.0 to 4.5m depth'
+    """
+    if not text:
+        return False
+
+    text_lower = text.strip().lower()
+
+    # Dimension pattern: starts with number + unit (e.g. "250 mm", "100 sq.mm")
+    if re.match(DIMENSION_PATTERN, text_lower):
+        return True
+
+    # Depth pattern: "3.0m depth"
+    if re.search(DEPTH_PATTERN, text_lower):
+        return True
+
+    # Starts with ignore words
+    for w in IGNORE_WORDS:
+        if text_lower.startswith(w):
+            return True
+
+    return False
+
+
+def contains_material_keyword(text: str) -> bool:
+    """Check if the text contains at least one known material keyword."""
+    if not text:
+        return False
+
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in MATERIAL_KEYWORDS)
 
 
 def is_valid_product(product: Any) -> bool:
@@ -56,8 +96,10 @@ def is_valid_product(product: Any) -> bool:
     if any(k in text_lower for k in INVALID_ROW_KEYWORDS):
         return False
 
-    # Section headings
-    if any(k in text_lower for k in SECTION_KEYWORDS):
+    # Section headings — BUT only if the text does NOT contain a material keyword
+    # e.g. "13 Passenger Lift with motor room" has "room" but also "lift"
+    has_material = any(kw in text_lower for kw in MATERIAL_KEYWORDS)
+    if not has_material and any(k in text_lower for k in SECTION_KEYWORDS):
         return False
 
     return True
