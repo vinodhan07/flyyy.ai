@@ -1,46 +1,63 @@
-# Text Cleaning Utilities
-from typing import Any
+# ─── Text Cleaning & Row Validation Utilities ───
 import re
-import pandas as pd
+from typing import Any
+
+from app.config.settings import (
+    INVALID_ROW_KEYWORDS,
+    SECTION_KEYWORDS,
+    MAX_PRODUCT_LENGTH,
+)
+
 
 def clean_text(text: Any) -> str:
     """Standardized text cleaning for consistency."""
     if text is None:
         return ""
-    
-    # Convert to string and strip whitespace
+
     text_str = str(text).strip()
-    
-    # Remove multiple spaces/newlines
-    text_str = re.sub(r'\s+', ' ', text_str)
-    
+    text_str = re.sub(r"\s+", " ", text_str)
     return text_str
 
-def normalize_header(text: Any) -> str:
-    """Normalize headers for better matching."""
-    cleaned = clean_text(text).lower()
-    # Remove special characters
-    cleaned = re.sub(r'[^a-z0-9]', '', cleaned)
-    return cleaned
 
 def clean_quantity(value: Any) -> float:
-    """Extract numerical value from strings like '10 Nos' or '5.5 Units'."""
-    if value is None or pd.isna(value):
+    """Extract the first numeric value from strings like '10 Nos' or '5.5 Units'."""
+    if value is None:
         return 0.0
-    
-    # Search for first number (integer or decimal)
-    match = re.search(r"(\d+(\.\d+)?)", str(value))
+
+    match = re.search(r"\d+(\.\d+)?", str(value))
     if match:
-        try:
-            return float(match.group(1))
-        except (ValueError, TypeError):
-            pass
+        return float(match.group())
+
     return 0.0
 
-def is_valid_row(product_text: str, invalid_keywords: list) -> bool:
-    """Check if a row is valid (not a total/subtotal row)."""
-    if not product_text:
+
+def is_valid_product(product: Any) -> bool:
+    """Combined validation: length, numeric, totals, sections."""
+    if product is None:
         return False
-    
-    text = str(product_text).lower()
-    return not any(k.lower() in text for k in invalid_keywords)
+
+    text = str(product).strip()
+
+    # Too short
+    if len(text) < 3:
+        return False
+
+    # Pure number (row index)
+    if text.replace(".", "").isnumeric():
+        return False
+
+    # Paragraph description
+    if len(text) > MAX_PRODUCT_LENGTH:
+        return False
+
+    text_lower = text.lower()
+
+    # Total / subtotal rows
+    if any(k in text_lower for k in INVALID_ROW_KEYWORDS):
+        return False
+
+    # Section headings
+    if any(k in text_lower for k in SECTION_KEYWORDS):
+        return False
+
+    return True

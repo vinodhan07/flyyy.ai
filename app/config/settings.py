@@ -1,5 +1,8 @@
-# Industry-specific configurations
+# ─── Centralized Configuration ───
 from typing import Dict, List
+
+# ─── Header Detection ───
+HEADER_SCAN_LIMIT = 20
 
 HEADER_KEYWORDS = [
     "description",
@@ -7,28 +10,53 @@ HEADER_KEYWORDS = [
     "material",
     "equipment",
     "qty",
-    "quantity"
+    "quantity",
+    "unit",
+    "rate",
+    "amount"
 ]
 
+# ─── Row Filtering ───
+SECTION_KEYWORDS = [
+    "building",
+    "hall",
+    "laboratory",
+    "room",
+    "area"
+]
+
+INVALID_ROW_KEYWORDS = [
+    "total",
+    "subtotal",
+    "grand total",
+    "note",
+    "remarks"
+]
+
+# ─── Extraction Limits ───
+MAX_PRODUCT_LENGTH = 150
+MAX_REASONABLE_QUANTITY = 1000
+
+# ─── Category Rules ───
 CATEGORY_RULES = {
-    "switchgear": ["breaker", "rmu", "switchgear"],
-    "power_equipment": ["transformer"],
-    "electrical_panel": ["panel", "distribution board"],
-    "electrical_appliance": ["fan", "light"]
+    "switchgear": ["breaker", "rmu"],
+    "power_equipment": ["transformer", "dg set", "substation"],
+    "electrical_panel": ["panel", "distribution"],
+    "electrical_appliance": ["fan", "light", "sensor", "ups"]
 }
 
-# No more hardcoding - all strings are centralized here
+# ─── Industry Configs ───
 INDUSTRY_CONFIGS: Dict[str, Dict] = {
     "construction": {
         "table_detection_keywords": ["description", "item", "equipment", "sl no", "particulars"],
         "field_mapping": {
-            "product": ["description", "item name", "equipment", "particulars"],
+            "product": ["description", "item name", "equipment", "particulars", "item"],
             "brand": ["brand", "make", "manufacturer"],
             "quantity": ["qty", "quantity", "nos"],
             "category": ["category", "group", "system"]
         },
         "thresholds": {
-            "fuzzy_match": 85
+            "fuzzy_match": 70
         }
     },
     "retail": {
@@ -40,7 +68,7 @@ INDUSTRY_CONFIGS: Dict[str, Dict] = {
             "category": ["department", "aisle", "section"]
         },
         "thresholds": {
-            "fuzzy_match": 80
+            "fuzzy_match": 70
         }
     },
     "default": {
@@ -52,14 +80,13 @@ INDUSTRY_CONFIGS: Dict[str, Dict] = {
             "category": ["category"]
         },
         "thresholds": {
-            "fuzzy_match": 80
+            "fuzzy_match": 70
         }
     }
 }
 
 DEFAULT_INDUSTRY = "construction"
 
-INVALID_ROW_KEYWORDS = ["total", "subtotal", "grand total", "note", "continued", "carried forward"]
 
 def get_config(industry: str = DEFAULT_INDUSTRY) -> Dict:
     return INDUSTRY_CONFIGS.get(industry, INDUSTRY_CONFIGS["default"])

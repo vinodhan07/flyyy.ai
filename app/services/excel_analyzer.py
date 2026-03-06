@@ -1,33 +1,48 @@
+# ─── Multi-Sheet Excel Processing ───
 import pandas as pd
+from typing import List, Dict
 from loguru import logger
-from app.config.settings import HEADER_KEYWORDS
 
-def select_boq_sheet(file_path):
-    xls = pd.ExcelFile(file_path)
-    best_sheet = None
-    best_score = 0
-    best_df = None
+from app.config.settings import HEADER_KEYWORDS, HEADER_SCAN_LIMIT, get_config
+from app.services.boq_table_detector import detect_header_row
+from app.services.boq_extractor import extract_items
 
-    for sheet in xls.sheet_names:
-        df = pd.read_excel(xls, sheet_name=sheet, engine="openpyxl", header=None)
 
-        # Scan first 20 rows only
-        scan_rows = min(len(df), 20)
-        score = 0
+def process_excel(file_stream, industry: str = "construction") -> Dict:
+    """
+    Full pipeline:
+    1. Open workbook
+    2. Loop through every sheet
+    3. Detect header, map columns, extract & validate items
+    4. Aggregate results across all sheets
+    """
+    config = get_config(industry)
+    xls = pd.ExcelFile(file_stream)
+    all_items: List[Dict] = []
+    sheets_processed: List[str] = []
 
-        for i in range(scan_rows):
-            row_text = " ".join(df.iloc[i].astype(str).str.lower())
-            for kw in HEADER_KEYWORDS:
-                if kw in row_text:
-                    score += 1
+    for sheet_name in xls.sheet_names:
+        logger.info(f"── Processing sheet: {sheet_name}")
+        df = pd.read_excel(xls, sheet_name=sheet_name, header=None)
 
-        if score > best_score:
-            best_score = score
-            best_sheet = sheet
-            best_df = df
+        # Detect header
+        header_row = detect_header_row(df)
+        logger.info(f"   Header detected at row {header_row}")
 
-    if best_df is None:
-        raise ValueError("No valid BOQ sheet detected")
+        # Extract items from this sheet
+        items = extract_items(
+            df,
+            header_row,
+            field_mapping=config["field_mapping"],
+            threshold=config["thresholds"]["fuzzy_match"],
+        )
 
-    logger.info(f"Selected sheet: {best_sheet} (score={best_score})")
-    return best_df, best_sheet
+        if items:
+            sheets_processed.append(sheet_name)
+            all_items.extend(items)
+
+    return {
+        "total_sheets": len(xls.sheet_names),
+        "sheets_with_data": sheets_processed,
+        "items": all_items,
+    }
