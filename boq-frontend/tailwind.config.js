@@ -7,22 +7,61 @@ export default {
     theme: {
         extend: {
             colors: {
-                background: "#0a0c10",
-                surface: "#11141a",
-                primary: "#3b82f6",
-                secondary: "#6366f1",
-                accent: "#8b5cf6",
+                base: {
+                    DEFAULT: "#0C0E12",
+                    light: "#12151B",
+                },
+                surface: {
+                    DEFAULT: "#1A1D25",
+                    hover: "#22252F",
+                },
+                border: {
+                    DEFAULT: "#2A2E38",
+                    light: "#363A46",
+                },
+                amber: {
+                    DEFAULT: "#F59E0B",
+                    dim: "#D97706",
+                    glow: "rgba(245, 158, 11, 0.15)",
+                    subtle: "rgba(245, 158, 11, 0.08)",
+                },
+                emerald: {
+                    DEFAULT: "#10B981",
+                    dim: "#059669",
+                    glow: "rgba(16, 185, 129, 0.15)",
+                },
+                slate: {
+                    400: "#94A3B8",
+                    500: "#64748B",
+                    600: "#475569",
+                },
+                danger: {
+                    DEFAULT: "#EF4444",
+                    glow: "rgba(239, 68, 68, 0.15)",
+                },
                 text: {
-                    primary: "#f8fafc",
-                    secondary: "#94a3b8",
-                    muted: "#64748b",
+                    primary: "#F1F5F9",
+                    secondary: "#94A3B8",
+                    muted: "#64748B",
                 },
             },
+            fontFamily: {
+                sans: ['Outfit', 'system-ui', '-apple-system', 'sans-serif'],
+                mono: ['DM Mono', 'Fira Code', 'monospace'],
+                display: ['Outfit', 'system-ui', 'sans-serif'],
+            },
             backgroundImage: {
-                'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01))',
+                'grid-dots': 'radial-gradient(circle at 1px 1px, rgba(245, 158, 11, 0.04) 1px, transparent 0)',
+            },
+            backgroundSize: {
+                'grid-dots': '24px 24px',
             },
             boxShadow: {
-                'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                'amber-glow': '0 0 24px rgba(245, 158, 11, 0.12)',
+                'emerald-glow': '0 0 24px rgba(16, 185, 129, 0.12)',
+            },
+            animation: {
+                'scan': 'scanLine 3s ease-in-out infinite',
             },
         },
     },
