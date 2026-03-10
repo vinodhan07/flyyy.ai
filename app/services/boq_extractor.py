@@ -129,16 +129,16 @@ def extract_items(df: pd.DataFrame, header_row: int, field_mapping: Dict, thresh
             if not is_valid_product(description):
                 continue
 
-            # ── Material keyword check ──
-            if not contains_material_keyword(description):
-                logger.debug(f"Skipping non-material row: {description[:60]}")
+            # Skip very short descriptions (likely noise like "1", "A", "Ref")
+            if len(description) < 5:
                 continue
 
             # ── Quantity ──
             raw_qty = _safe_get(row, df, qty_col) if qty_col else None
             quantity = clean_quantity(raw_qty)
 
-            if quantity <= 0 or quantity > MAX_REASONABLE_QUANTITY:
+            # Only skip if quantity is clearly over the max limit (don't skip qty=0 — it may just be missing)
+            if quantity > MAX_REASONABLE_QUANTITY:
                 continue
 
             # ── Brand ──
@@ -208,10 +208,12 @@ def group_by_category(items: List[Dict]) -> Dict[str, List[Dict]]:
 
 
 def read_excel_to_text(file_path):
-    # This reads the Excel file
-    df = pd.read_excel(file_path)
+    # 'sheet_name=None' tells Pandas to read every single tab in the Excel file
+    all_sheets = pd.read_excel(file_path, sheet_name=None)
+    combined_text = ""
     
-    # This turns the whole file into a big block of text
-    messy_text = df.to_string()
-    
-    return messy_text
+    for sheet_name, df in all_sheets.items():
+        combined_text += f"\n--- SHEET: {sheet_name} ---\n"
+        combined_text += df.to_string()
+        
+    return combined_text

@@ -35,7 +35,7 @@ INVALID_ROW_KEYWORDS = [
 
 # ─── Extraction Limits ───
 MAX_PRODUCT_LENGTH = 200  # Raised slightly to allow merged descriptions
-MAX_REASONABLE_QUANTITY = 1000
+MAX_REASONABLE_QUANTITY = 999999  # No practical upper limit — large civil quantities are valid
 
 # ─── Engineering Attribute Ignore Words ───
 # NOTE: 'total'/'subtotal' are NOT here — they're in INVALID_ROW_KEYWORDS
@@ -88,18 +88,35 @@ EPC_CATEGORY_RULES = {
 # ─── Material Keyword Validation ───
 # Only keep rows that contain at least one of these real-material words
 MATERIAL_KEYWORDS = [
-    "pipe", "cable", "lift", "light", "panel",
-    "cement", "brick", "fan", "tray", "wire",
-    "valve", "pump", "switch", "socket", "conduit",
-    "transformer", "breaker", "lamp", "led", "xlpe",
-    "armoured", "concrete", "sand", "steel", "elevator",
-    "sensor", "fixture", "mcb", "isolator", "earthing",
-    "bitumen", "aggregate", "holder", "dryer", "mirror",
-    "ups", "dg set", "substation", "switchgear",
-    "distribution board", "rmu", "tap", "cock",
-    "chilled water", "drain", "water supply",
-    "reinforcement", "bulkhead", "flood", "downlight",
-    "junction", "charger", "tube"
+    # Electrical
+    "cable", "wire", "conduit", "tray", "xlpe", "armoured", "wiring",
+    "switch", "socket", "mcb", "isolator", "earthing", "charger", "junction",
+    "transformer", "breaker", "ups", "dg set", "substation", "switchgear",
+    "distribution board", "rmu", "panel", "busbar", "contactor", "relay",
+    "fuse", "meter", "capacitor", "inverter", "rectifier",
+    # Lighting
+    "light", "lamp", "led", "downlight", "tube", "flood", "bulkhead",
+    "lighting", "luminaire", "spotlight", "streetlight", "lantern",
+    # Plumbing / HVAC
+    "pipe", "valve", "tap", "cock", "pump", "chilled water", "drain",
+    "water supply", "fitting", "coupling", "flange", "elbow", "tee",
+    "reducer", "hanger", "support", "clamp", "bracket", "strainer",
+    "duct", "insulation", "grille", "diffuser", "damper", "ahu", "fcu",
+    # Vertical transport
+    "lift", "elevator", "escalator",
+    # Fixtures & fittings
+    "fan", "sensor", "fixture", "holder", "dryer", "mirror",
+    "toilet", "basin", "urinal", "cistern", "shower",
+    # Civil / structural
+    "cement", "sand", "brick", "aggregate", "concrete", "bitumen",
+    "steel", "reinforcement", "rebar", "rod", "bar", "mesh", "fiber",
+    "formwork", "shutter", "waterproofing", "sealant", "grout",
+    "paint", "plaster", "gypsum", "tile", "granite", "marble",
+    "flooring", "coping", "cladding", "curtain wall", "glazing",
+    "bolt", "anchor", "screw", "nut", "washer",
+    # Misc structural
+    "beam", "column", "slab", "footing", "raft", "pile", "truss",
+    "purlin", "rafter", "gutter", "roof", "metal deck",
 ]
 
 # ─── Industry Configs ───

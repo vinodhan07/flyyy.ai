@@ -62,10 +62,7 @@ async def extract_excel_data(
         # 9. Normalize Product Names (Fuzzy Merge)
         items = normalize_products(items)
 
-        # 10. Classify EPC Category (Already done in extract_items, but re-consolidated here)
-        
         # 11. Merge Duplicate Materials (Final Exact Grouping)
-        items = [i for i in items if i["quantity"] > 0]
         items = consolidate_duplicates(items)
 
         logger.info(f"Final output: {len(items)} items from {result['total_sheets']} sheet(s).")
@@ -96,15 +93,69 @@ async def upload_excel_file(
         "construction", description="Target industry for AI context"
     )
 ):
-    # 1. Save the file temporarily
-    with open("temp.xlsx", "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        
-    # 2. Read it into text (Step 2)
-    messy_text = read_excel_to_text("temp.xlsx")
-    
-    # 3. Send to AI to clean up (Step 3)
-    final_boq = extract_with_ai(messy_text, industry=industry)
-    
-    # 4. Send the neat list back to the user!
-    return final_boq
+    logger.info(f"AI Extraction Request: industry={industry}, file={file.filename}")
+
+    try:
+        # 1. Validate file
+        contents = await validate_file(file)
+
+        # 2. Save the file temporarily
+        import tempfile, os
+        temp_path = os.path.join(tempfile.gettempdir(), "boq_temp.xlsx")
+        with open(temp_path, "wb") as buffer:
+            buffer.write(contents)
+
+        # 3. Read ALL sheets into text
+        messy_text = read_excel_to_text(temp_path)
+        logger.info(f"Total text length from Excel: {len(messy_text)} chars")
+
+        # 4. Count sheets for the response
+        import pandas as pd
+        xls = pd.ExcelFile(temp_path)
+        total_sheets = len(xls.sheet_names)
+        sheets_with_data = list(xls.sheet_names)
+        xls.close()
+
+        # 5. Try AI Agent first
+        final_boq = extract_with_ai(messy_text, industry=industry)
+        items = final_boq.get("items", [])
+
+        # 6. FALLBACK: If AI returned 0 items (quota exhausted), use heuristic extraction
+        if len(items) == 0:
+            logger.warning("AI extraction returned 0 items — falling back to heuristic extraction")
+            result = process_excel(io.BytesIO(contents), industry=industry)
+            items = result["items"]
+            items = normalize_products(items)
+            items = consolidate_duplicates(items)
+            logger.info(f"Heuristic fallback: {len(items)} items extracted")
+
+        # 7. Build category groups
+        from collections import defaultdict
+        categories = defaultdict(list)
+        for item in items:
+            cat = item.get("category", "Uncategorized")
+            categories[cat].append(item)
+
+        logger.info(f"Extraction complete: {len(items)} items from {total_sheets} sheet(s)")
+
+        # Clean up temp file
+        try:
+            os.remove(temp_path)
+        except OSError:
+            pass
+
+        # 8. Return consistent response
+        return {
+            "total_sheets": total_sheets,
+            "sheets_with_data": sheets_with_data,
+            "extracted_items": len(items),
+            "items": items,
+            "categories": dict(categories),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Extraction failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
+

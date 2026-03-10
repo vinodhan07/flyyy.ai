@@ -21,12 +21,17 @@ app.add_middleware(
 # ─── API routes ───
 app.include_router(router)
 
+import os
+
 # ─── Static files (React Build) ───
-app.mount("/assets", StaticFiles(directory="boq-frontend/dist/assets"), name="assets")
+if os.path.exists("boq-frontend/dist/assets"):
+    app.mount("/assets", StaticFiles(directory="boq-frontend/dist/assets"), name="assets")
 
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
-    # Only serve index.html for non-API routes
+    # Only serve index.html for non-API routes if it exists
     if full_path.startswith("api"):
-        return None
-    return FileResponse("boq-frontend/dist/index.html")
+        return {"error": "API route not found"}
+    if os.path.exists("boq-frontend/dist/index.html"):
+        return FileResponse("boq-frontend/dist/index.html")
+    return {"message": "Frontend not built yet. Run 'npm run build' in boq-frontend."}

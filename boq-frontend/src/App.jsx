@@ -34,7 +34,8 @@ function App() {
       setResults(data);
     } catch (err) {
       console.error(err);
-      setError('Failed to extract data. Please check the backend connection.');
+      const detail = err?.response?.data?.detail || err?.message || 'Unknown error';
+      setError(`Extraction failed: ${detail}`);
     } finally {
       setLoading(false);
     }
@@ -207,12 +208,12 @@ function ResultsDisplay({ data, onReset }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
-                  {data.items.slice(0, 50).map((item, idx) => (
+                  {data.items.map((item, idx) => (
                     <motion.tr
                       key={idx}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.03 }}
+                      transition={{ delay: Math.min(idx * 0.03, 1.5) }}
                       className="hover:bg-white/[0.02] transition-colors group"
                     >
                       <td className="px-6 py-4 text-sm font-medium">
@@ -231,11 +232,6 @@ function ResultsDisplay({ data, onReset }) {
                 </tbody>
               </table>
             </div>
-            {data.items.length > 50 && (
-              <div className="p-4 text-center text-text-muted text-xs bg-white/5 border-t border-white/10">
-                Showing top 50 items. {data.items.length - 50} more items hidden.
-              </div>
-            )}
           </div>
         </div>
       </div>
