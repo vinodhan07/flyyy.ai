@@ -105,11 +105,18 @@ def extract_items(df: pd.DataFrame, header_row: int, field_mapping: Dict, thresh
     df.columns = df.iloc[header_row]
     df = df.iloc[header_row + 1:].reset_index(drop=True)
 
+    # ── Full Dataset Cleaning (Structural Rules) ──
+    from ..utils.data_cleaner import clean_dataframe_structure, standardize_dataframe_columns
+    df = clean_dataframe_structure(df)
+
     # Map columns
     columns = identify_columns(df.columns.tolist(), field_mapping, threshold=threshold)
     logger.info(f"Column mapping: {columns}")
 
-    desc_col = columns["description"]
+    # ── Full Dataset Cleaning (Column-Specific Rules) ──
+    df = standardize_dataframe_columns(df, columns)
+
+    desc_col = columns.get("description")
     brand_col = columns.get("brand")
     qty_col = columns.get("quantity")
     unit_col = columns.get("unit")

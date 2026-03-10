@@ -92,6 +92,10 @@ def is_valid_product(product: Any) -> bool:
 
     text_lower = text.lower()
 
+    # Sheet/Section index markers (e.g. "boq 1", "boq2:", "sched 3")
+    if re.match(r"^(boq|sheet|sched|item)\s*\d+[:\.]?$", text_lower):
+        return False
+
     # Total / subtotal rows
     if any(k in text_lower for k in INVALID_ROW_KEYWORDS):
         return False
